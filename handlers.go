@@ -4,18 +4,29 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/rcrowley/go-tigertonic"
 	"github.com/willnix/tinkerBlog/blog"
 )
 
-var (
-	mux *tigertonic.TrieServeMux
-)
+func (r RestBlog) blogList(url *url.URL, header http.Header, req *BlogRequest) (int, http.Header, []*blog.Entry, error) {
 
-func init() {
-	mux = tigertonic.NewTrieServeMux()
+	entries, err := r.blogStore.LatestEntries()
+	if err != nil {
+		return http.StatusInternalServerError, nil, nil, err
+	}
+	return http.StatusOK, nil, entries, nil
 }
 
-func getPosts(u *url.URL, header http.Header, req *postsReq) (int, http.Header, []*blog.Entry, error) {
-	return 0, nil, nil, nil
+func (r RestBlog) blogPost(url *url.URL, header http.Header, req *BlogRequest) (int, http.Header, *blog.Entry, error) {
+
+	e, err := r.blogStore.FindById(url.Query().Get("id"))
+	switch {
+	case err == nil:
+		return http.StatusOK, nil, e, nil
+
+	case err == blog.ErrEntryNotFound:
+		return http.StatusNotFound, nil, nil, blog.ErrEntryNotFound
+
+	default:
+		return http.StatusInternalServerError, nil, nil, err
+	}
 }
