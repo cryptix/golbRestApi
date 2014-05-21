@@ -27,22 +27,22 @@ func setup() (mux *tigertonic.TrieServeMux, api *RestBlog) {
 	api = NewMgoBlog(mgoSession, dbName, dbColl)
 
 	mux = tigertonic.NewTrieServeMux()
-	mux.Handle("GET", "/blog", tigertonic.Marshaled(api.blogList))
-	mux.Handle("GET", "/blog/{{id}}", tigertonic.Marshaled(api.blogPost))
+	mux.Handle("GET", "/blog", tigertonic.Marshaled(api.List))
+	mux.Handle("GET", "/blog/{{id}}", tigertonic.Marshaled(api.GetPost))
 
 	return
 }
 
-func TestBlogList(t *testing.T) {
+func TestList(t *testing.T) {
 	var (
 		mux *tigertonic.TrieServeMux
 		api *RestBlog
 	)
 
-	Convey("blogList sanity", t, func() {
+	Convey("List sanity", t, func() {
 		mux, api = setup()
 
-		code, headers, _, err := api.blogList(
+		code, headers, _, err := api.List(
 			mocking.URL(mux, "GET", "/blog"),
 			mocking.Header(nil),
 			nil,
@@ -60,15 +60,15 @@ func TestBlogList(t *testing.T) {
 	})
 }
 
-func TestBlogPost(t *testing.T) {
+func TestGetPost(t *testing.T) {
 	var (
 		mux *tigertonic.TrieServeMux
 		api *RestBlog
 	)
-	Convey("blogPost sanity", t, func() {
+	Convey("GetPost sanity", t, func() {
 		mux, api = setup()
 
-		code, headers, _, err := api.blogPost(
+		code, headers, _, err := api.GetPost(
 			mocking.URL(mux, "GET", "/blog/536894f2b8fed518e5000001"),
 			mocking.Header(nil),
 			nil,
@@ -85,10 +85,10 @@ func TestBlogPost(t *testing.T) {
 
 	})
 
-	Convey("blogPost not found", t, func() {
+	Convey("GetPost not found", t, func() {
 		mux, api = setup()
 
-		code, headers, _, err := api.blogPost(
+		code, headers, _, err := api.GetPost(
 			mocking.URL(mux, "GET", "/blog/5375e499b8fed50f4f000001"),
 			mocking.Header(nil),
 			nil,

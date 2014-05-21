@@ -7,7 +7,7 @@ import (
 	"github.com/willnix/tinkerBlog/blog"
 )
 
-func (r RestBlog) blogList(url *url.URL, header http.Header, req *BlogRequest) (int, http.Header, []*blog.Entry, error) {
+func (r RestBlog) List(url *url.URL, header http.Header, req *BlogRequest) (int, http.Header, []*blog.Entry, error) {
 
 	entries, err := r.blogStore.LatestEntries()
 	if err != nil {
@@ -16,7 +16,7 @@ func (r RestBlog) blogList(url *url.URL, header http.Header, req *BlogRequest) (
 	return http.StatusOK, nil, entries, nil
 }
 
-func (r RestBlog) blogPost(url *url.URL, header http.Header, req *BlogRequest) (int, http.Header, *blog.Entry, error) {
+func (r RestBlog) GetPost(url *url.URL, header http.Header, req *BlogRequest) (int, http.Header, *blog.Entry, error) {
 
 	e, err := r.blogStore.FindById(url.Query().Get("id"))
 	switch {
