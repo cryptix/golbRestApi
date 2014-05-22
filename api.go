@@ -1,16 +1,16 @@
-package restBlog
+package golbRestApi
 
 import (
-	"github.com/willnix/tinkerBlog/blog"
+	"github.com/cryptix/golbStore"
 	"labix.org/v2/mgo"
 )
 
 type BlogRequest struct{}
 
 type RestBlog struct {
-	blogStore blog.Blogger
+	blogStore *golbStore.MgoBlog
 }
 
-func NewMgoBlog(s *mgo.Session, dbName, collName string) *RestBlog {
-	return &RestBlog{blog.NewMgoBlog(s, &blog.Options{dbName, collName})}
+func NewBlogApi(s *mgo.Session, dbName, collName string) *RestBlog {
+	return &RestBlog{golbStore.NewMgoBlog(s, &golbStore.Options{dbName, collName})}
 }

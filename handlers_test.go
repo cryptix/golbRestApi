@@ -1,4 +1,4 @@
-package restBlog
+package golbRestApi
 
 import (
 	"fmt"
