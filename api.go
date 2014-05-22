@@ -5,8 +5,6 @@ import (
 	"labix.org/v2/mgo"
 )
 
-type BlogRequest struct{}
-
 type RestBlog struct {
 	blogStore *golbStore.MgoBlog
 }
