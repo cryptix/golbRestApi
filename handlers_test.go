@@ -1,32 +1,28 @@
 package golbRestApi
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 
 	"github.com/cryptix/golbStore"
-	"github.com/cryptix/golbStore/mgo"
+	"github.com/cryptix/golbStore/ipsum"
 
 	"github.com/rcrowley/go-tigertonic"
 	"github.com/rcrowley/go-tigertonic/mocking"
 	. "github.com/smartystreets/goconvey/convey"
-	"labix.org/v2/mgo"
-)
-
-const (
-	dbHost = "localhost"
-	dbName = "blog"
-	dbColl = "blogEntries"
 )
 
 func setup() (mux *tigertonic.TrieServeMux, api *RestBlogApi) {
-	mgoSession, err := mgo.Dial(fmt.Sprintf("%s/%s", dbHost, dbName))
+	var err error
+
+	store := golbStoreIpsum.NewStore()
+
+	err = store.Save(&golbStore.Entry{ID: "ImHere"})
 	if err != nil {
 		panic(err)
 	}
 
-	api = NewRestBlogApi(golbStoreMgo.NewStore(mgoSession, &golbStoreMgo.Options{dbName, dbColl}))
+	api = NewRestBlogApi(store)
 
 	mux = tigertonic.NewTrieServeMux()
 	mux.Handle("GET", "/blog", tigertonic.Marshaled(api.List))
@@ -71,7 +67,7 @@ func TestGetPost(t *testing.T) {
 		mux, api = setup()
 
 		code, headers, _, err := api.GetPost(
-			mocking.URL(mux, "GET", "/blog/536797b7b8fed507ae000002"),
+			mocking.URL(mux, "GET", "/blog/ImHere"),
 			mocking.Header(nil),
 			nil,
 		)
@@ -91,7 +87,7 @@ func TestGetPost(t *testing.T) {
 		mux, api = setup()
 
 		code, headers, _, err := api.GetPost(
-			mocking.URL(mux, "GET", "/blog/5375e499b8fed50f4f000001"),
+			mocking.URL(mux, "GET", "/blog/ImNotHere"),
 			mocking.Header(nil),
 			nil,
 		)
