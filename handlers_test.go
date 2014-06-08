@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/willnix/tinkerBlog/blog"
+	"github.com/cryptix/golbStore"
+	"github.com/cryptix/golbStore/mgo"
 
 	"github.com/rcrowley/go-tigertonic"
 	"github.com/rcrowley/go-tigertonic/mocking"
@@ -19,12 +20,13 @@ const (
 	dbColl = "blogEntries"
 )
 
-func setup() (mux *tigertonic.TrieServeMux, api *RestBlog) {
+func setup() (mux *tigertonic.TrieServeMux, api *RestBlogApi) {
 	mgoSession, err := mgo.Dial(fmt.Sprintf("%s/%s", dbHost, dbName))
 	if err != nil {
 		panic(err)
 	}
-	api = NewMgoBlog(mgoSession, dbName, dbColl)
+
+	api = NewRestBlogApi(golbStoreMgo.NewStore(mgoSession, &golbStoreMgo.Options{dbName, dbColl}))
 
 	mux = tigertonic.NewTrieServeMux()
 	mux.Handle("GET", "/blog", tigertonic.Marshaled(api.List))
@@ -36,7 +38,7 @@ func setup() (mux *tigertonic.TrieServeMux, api *RestBlog) {
 func TestList(t *testing.T) {
 	var (
 		mux *tigertonic.TrieServeMux
-		api *RestBlog
+		api *RestBlogApi
 	)
 
 	Convey("List sanity", t, func() {
@@ -45,7 +47,7 @@ func TestList(t *testing.T) {
 		code, headers, _, err := api.List(
 			mocking.URL(mux, "GET", "/blog"),
 			mocking.Header(nil),
-			nil,
+			&ListRequest{10, false},
 		)
 
 		Convey("it returns ok", func() {
@@ -63,13 +65,13 @@ func TestList(t *testing.T) {
 func TestGetPost(t *testing.T) {
 	var (
 		mux *tigertonic.TrieServeMux
-		api *RestBlog
+		api *RestBlogApi
 	)
 	Convey("GetPost sanity", t, func() {
 		mux, api = setup()
 
 		code, headers, _, err := api.GetPost(
-			mocking.URL(mux, "GET", "/blog/536894f2b8fed518e5000001"),
+			mocking.URL(mux, "GET", "/blog/536797b7b8fed507ae000002"),
 			mocking.Header(nil),
 			nil,
 		)
@@ -95,7 +97,7 @@ func TestGetPost(t *testing.T) {
 		)
 
 		Convey("it returns 404", func() {
-			So(err, ShouldEqual, blog.ErrEntryNotFound)
+			So(err, ShouldEqual, golbStore.ErrEntryNotFound)
 			So(code, ShouldEqual, http.StatusNotFound)
 		})
 

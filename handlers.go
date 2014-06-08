@@ -7,11 +7,14 @@ import (
 	"github.com/cryptix/golbStore"
 )
 
-type ListRequest struct{ WithText bool }
+type ListRequest struct{
+	Count int
+	WithText bool
+}
 
-func (r RestBlog) List(url *url.URL, header http.Header, req *ListRequest) (code int, h http.Header, entries []*golbStore.Entry, err error) {
+func (r *RestBlogApi) List(url *url.URL, header http.Header, req *ListRequest) (code int, h http.Header, entries []*golbStore.Entry, err error) {
 
-	entries, err = r.blogStore.LatestEntries(req.WithText)
+	entries, err = r.blogStore.Latest(10, req.WithText)
 	if err != nil {
 		return http.StatusInternalServerError, nil, nil, err
 	}
@@ -20,9 +23,9 @@ func (r RestBlog) List(url *url.URL, header http.Header, req *ListRequest) (code
 
 type GetPostRequest struct{}
 
-func (r RestBlog) GetPost(url *url.URL, header http.Header, req *GetPostRequest) (int, http.Header, *golbStore.Entry, error) {
+func (r *RestBlogApi) GetPost(url *url.URL, header http.Header, req *GetPostRequest) (int, http.Header, *golbStore.Entry, error) {
 
-	e, err := r.blogStore.FindById(url.Query().Get("id"))
+	e, err := r.blogStore.Get(url.Query().Get("id"))
 	switch {
 	case err == nil:
 		return http.StatusOK, nil, e, nil
